@@ -1,17 +1,30 @@
 
-let decisionThree = null;
-let pcSolutions = [];
+
+// ===============================
+// VARIABLES DEL JUEGO
+// ===============================
 
 let board = [
   ["", "", ""],
   ["", "", ""],
-  ["", "", ""],
+  ["", "", ""]
 ];
 
-let turn = 0; //0 user, 1 = pc
+
+let turn = 0;
+// 0 = Jugador 1 (O)
+// 1 = Jugador 2 (X)
+
+
 let gameOver = false;
 
+
+// ===============================
+// INICIAR JUEGO
+// ===============================
+
 startGame();
+
 
 function startGame() {
 
@@ -33,6 +46,13 @@ function startGame() {
   }
 
 }
+
+
+
+// ===============================
+// MOSTRAR TABLERO
+// ===============================
+
 
 function renderBoard() {
 
@@ -64,177 +84,422 @@ function renderBoard() {
 
 
 
+// ===============================
+// MOSTRAR TURNO
+// ===============================
+
+
 function renderPlayer() {
-  document.querySelector("#player").textContent = `${
-    turn === 0 ? "Player turn" : "PC turn"
-  }`;
-}
 
-function PCPlays() {
-  console.log("PC Plays... ");
-}
+  const player =
+    document.querySelector("#player");
 
-function PCPlaysV2() {
-  debugger;
-  console.log("PC Plays...V2 ");
-  //create three
-  const copy = JSON.parse(JSON.stringify(board));
-  const root = new Node(copy);
-  processNode(root, true, 0);
 
-  console.log("final", root);
+  if (gameOver) {
 
-  if (pcSolutions.length > 0) {
-    let min = 100;
-    for (let i = 0; i < pcSolutions.length; i++) {
-      if (pcSolutions[i].level < min) {
-        min = pcSolutions[i].level;
-      }
-    }
-    pcSolutions = pcSolutions.filter((sol) => sol.level === min);
-    const moveIndex = parseInt(Math.random() * (pcSolutions.length - 0) + 0);
-    console.log({ pcSolutions, moveIndex });
-    const move = getRoot(pcSolutions[moveIndex]);
-    console.log({ move });
-    decisionThree = move;
-    board = JSON.parse(JSON.stringify(move.value));
-    console.log({ board });
-    turn = 0;
-    renderBoard();
-    renderPlayer();
-    const won = checkIfWinner();
-    if (won === "none") {
-      pcSolutions = [];
-      playerPlays();
-    }
-  } else {
-    console.log("Empate...");
-  }
-}
+    player.textContent = "Partida finalizada";
 
-function processNode(root, nturn, level) {
-  for (let i = 0; i < board.length; i++) {
-    for (let j = 0; j < board[i].length; j++) {
-      if (root.value[i][j] === "") {
-        root.children.push(createChild(root, i, j, nturn, level));
-      }
-    }
-  }
-  //check if winner cpu
-  for (let i = 0; i < root.children.length; i++) {
-    if (checkIfPCWinner(root.children[i].value)) {
-      pcSolutions.push(root.children[i]);
-    }
+    return;
+
   }
 
-  //process next level
-  for (let i = 0; i < root.children.length; i++) {
-    const item = root.children[i];
-    processNode(item, !nturn, level + 1);
-  }
+
+  player.textContent =
+    turn === 0
+      ? "Turno: Jugador 1 (O)"
+      : "Turno: Jugador 2 (X)";
+
 }
 
-function createChild(node, i, j, nturn, level) {
-  const copy = JSON.parse(JSON.stringify(node.value));
 
-  if (!nturn) {
-    copy[i][j] = "O";
-  } else {
-    copy[i][j] = "X";
-  }
-  const newNode = new Node(copy);
-  newNode.turn = nturn;
-  newNode.level = level + 1;
-  newNode.parent = node;
-  return newNode;
-}
+
+// ===============================
+// TURNO JUGADOR
+// ===============================
+
 
 function playerPlays() {
-  console.log("player plays");
 
-  document.querySelectorAll(".cell").forEach((buttonCell, i) => {
-    const row = i % 3;
-    const column = parseInt(i / 3);
-    if (board[column][row] === "") {
-      buttonCell.addEventListener("click", (e) => {
-        board[column][row] = "O";
-        buttonCell.textContent = board[column][row];
-        turn = 1;
-        const won = checkIfWinner();
-        debugger;
-        if (won === "none") {
-          PCPlaysV2();
+
+  document.querySelectorAll(".cell")
+    .forEach(cell => {
+
+
+      cell.addEventListener("click", () => {
+
+
+        if (gameOver) return;
+
+
+        const row =
+          cell.dataset.row;
+
+
+        const column =
+          cell.dataset.column;
+
+
+
+        // evita repetir casilla
+
+        if (board[row][column] !== "") {
+
+          return;
+
         }
+
+
+
+        board[row][column] = "O";
+
+
+        updateCell(cell, "O");
+
+
+
+        let winner = checkWinner();
+
+
+        if (winner) {
+
+          finishGame(winner);
+
+          return;
+
+        }
+
+
+
+        if (checkDraw()) {
+
+          finishGame("draw");
+
+          return;
+
+        }
+
+
+
+        turn = 1;
+
+        renderPlayer();
+
+
+
+        setTimeout(() => {
+
+          computerPlay();
+
+        }, 500);
+
+
+
       });
+
+
+    });
+
+
+}
+
+
+
+// ===============================
+// JUGADA COMPUTADORA
+// ===============================
+
+
+function computerPlay() {
+
+
+  if (gameOver) return;
+
+
+
+  let empty = [];
+
+
+
+  for (let row = 0; row < 3; row++) {
+
+    for (let col = 0; col < 3; col++) {
+
+
+      if (board[row][col] === "") {
+
+        empty.push({
+          row,
+          col
+        });
+
+      }
+
     }
+
+  }
+
+
+
+  if (empty.length === 0) {
+
+    finishGame("draw");
+
+    return;
+
+  }
+
+
+
+  let move =
+    empty[Math.floor(Math.random() * empty.length)];
+
+
+
+  board[move.row][move.col] = "X";
+
+
+
+  renderBoard();
+
+
+
+  const button =
+    document.querySelector(
+      `[data-row="${move.row}"][data-column="${move.col}"]`
+    );
+
+
+  button.classList.add("anim");
+
+
+
+  let winner = checkWinner();
+
+
+
+  if (winner) {
+
+    finishGame(winner);
+
+    return;
+
+  }
+
+
+
+  if (checkDraw()) {
+
+    finishGame("draw");
+
+    return;
+
+  }
+
+
+
+  turn = 0;
+
+  renderPlayer();
+
+
+  playerPlays();
+
+}
+
+
+
+// ===============================
+// ACTUALIZAR CASILLA
+// ===============================
+
+
+function updateCell(cell, value) {
+
+  cell.textContent = value;
+
+  cell.classList.add("anim");
+
+
+  if (value === "O") {
+
+    cell.style.color = "#2563eb";
+
+  }
+
+
+  if (value === "X") {
+
+    cell.style.color = "#ef4444";
+
+  }
+
+}
+
+
+
+// ===============================
+// VALIDAR GANADOR
+// ===============================
+
+
+function checkWinner() {
+
+
+  const combinations = [
+
+    [0, 0, 0, 1, 0, 2],
+    [1, 0, 1, 1, 1, 2],
+    [2, 0, 2, 1, 2, 2],
+
+    [0, 0, 1, 0, 2, 0],
+    [0, 1, 1, 1, 2, 1],
+    [0, 2, 1, 2, 2, 2],
+
+    [0, 0, 1, 1, 2, 2],
+    [0, 2, 1, 1, 2, 0]
+
+  ];
+
+
+
+  for (let combo of combinations) {
+
+
+    let a =
+      board[combo[0]][combo[1]];
+
+
+    let b =
+      board[combo[2]][combo[3]];
+
+
+    let c =
+      board[combo[4]][combo[5]];
+
+
+
+    if (a !== "" && a === b && b === c) {
+
+      return a;
+
+    }
+
+  }
+
+
+  return null;
+
+}
+
+
+
+// ===============================
+// EMPATE
+// ===============================
+
+
+function checkDraw() {
+
+
+  return board.every(row =>
+
+    row.every(cell =>
+
+      cell !== ""
+
+    )
+
+  );
+
+}
+
+
+
+// ===============================
+// FINALIZAR PARTIDA
+// ===============================
+
+
+function finishGame(result) {
+
+
+  gameOver = true;
+
+
+
+  const message =
+    document.querySelector("#message");
+
+
+
+  if (result === "O") {
+
+    message.textContent =
+      "🏆 Ganador: Jugador 1 (O)";
+
+  }
+
+
+  else if (result === "X") {
+
+
+    message.textContent =
+      "🏆 Ganador: Jugador 2 (X)";
+
+  }
+
+
+  else {
+
+
+    message.textContent =
+      "🤝 Empate";
+
+  }
+
+
+
+  renderPlayer();
+
+
+}
+
+
+
+// ===============================
+// REINICIAR
+// ===============================
+
+
+document
+  .querySelector("#restart")
+  .addEventListener("click", () => {
+
+
+    board = [
+
+      ["", "", ""],
+
+      ["", "", ""],
+
+      ["", "", ""]
+
+    ];
+
+
+
+    gameOver = false;
+
+
+
+    document
+      .querySelector("#message")
+      .textContent = "";
+
+
+
+    startGame();
+
+
+
   });
-}
-
-function checkIfWinner() {
-  const PCWon = [
-    board[0][0] === "X" && board[1][1] === "X" && board[2][2] === "X",
-    board[2][0] === "X" && board[1][1] === "X" && board[0][2] === "X",
-    board[0][0] === "X" && board[1][0] === "X" && board[2][0] === "X",
-    board[0][1] === "X" && board[1][1] === "X" && board[2][1] === "X",
-    board[0][2] === "X" && board[1][2] === "X" && board[2][2] === "X",
-    board[0][0] === "X" && board[0][1] === "X" && board[0][2] === "X",
-    board[1][0] === "X" && board[1][1] === "X" && board[1][2] === "X",
-    board[2][0] === "X" && board[2][1] === "X" && board[2][2] === "X",
-  ];
-  const playerWon = [
-    board[0][0] === "O" && board[1][1] === "O" && board[2][2] === "O",
-    board[2][0] === "O" && board[1][1] === "O" && board[0][2] === "O",
-    board[0][0] === "O" && board[1][0] === "O" && board[2][0] === "O",
-    board[0][1] === "O" && board[1][1] === "O" && board[2][1] === "O",
-    board[0][2] === "O" && board[1][2] === "O" && board[2][2] === "O",
-    board[0][0] === "O" && board[0][1] === "O" && board[0][2] === "O",
-    board[1][0] === "O" && board[1][1] === "O" && board[1][2] === "O",
-    board[2][0] === "O" && board[2][1] === "O" && board[2][2] === "O",
-  ];
-
-  if (PCWon.includes(true)) {
-    console.log("PC WON");
-    return "pcwon";
-  }
-  if (playerWon.includes(true)) {
-    console.log("Player WON");
-    return "playerwon";
-  }
-  return "none";
-}
-function checkIfPCWinner(arr) {
-  const PCWon = [
-    arr[0][0] === "X" && arr[1][1] === "X" && arr[2][2] === "X",
-    arr[2][0] === "X" && arr[1][1] === "X" && arr[0][2] === "X",
-    arr[0][0] === "X" && arr[1][0] === "X" && arr[2][0] === "X",
-    arr[0][1] === "X" && arr[1][1] === "X" && arr[2][1] === "X",
-    arr[0][2] === "X" && arr[1][2] === "X" && arr[2][2] === "X",
-    arr[0][0] === "X" && arr[0][1] === "X" && arr[0][2] === "X",
-    arr[1][0] === "X" && arr[1][1] === "X" && arr[1][2] === "X",
-    arr[2][0] === "X" && arr[2][1] === "X" && arr[2][2] === "X",
-  ];
-  return PCWon.includes(true);
-}
-
-function checkIfPlayerCanWin(arr) {
-  const PCWon = [
-    arr[0][0] === "O" && arr[1][1] === "O",
-    arr[2][0] === "O" && arr[1][1] === "O",
-    arr[0][0] === "O" && arr[1][0] === "O",
-    arr[0][1] === "O" && arr[1][1] === "O",
-    arr[0][2] === "O" && arr[1][2] === "O",
-    arr[0][0] === "O" && arr[0][1] === "O",
-    arr[1][0] === "O" && arr[1][1] === "O",
-    arr[2][0] === "O" && arr[2][1] === "O",
-  ];
-  return PCWon.includes(true);
-}
-
-function getRoot(node) {
-  let n = node;
-  while (n.parent.parent != null) {
-    n = n.parent;
-  }
-
-  return n;
-}
