@@ -1,18 +1,434 @@
-body {
-  font-family: Arial, Helvetica, sans-serif;
+/* ===========================
+   CONFIGURACIÓN GENERAL
+=========================== */
+
+
+* {
+  box-sizing: border-box;
 }
 
-.board {
+
+body {
+
+  margin: 0;
+
+  height: 100vh;
+
   display: flex;
-  flex-direction: column;
+
+  justify-content: center;
+
+  align-items: center;
+
+
+  font-family: 'Segoe UI', Arial, sans-serif;
+
+
+  background:
+    linear-gradient(135deg,
+      #667eea,
+      #764ba2);
+
+
+  overflow: hidden;
+
 }
-.row {
-  display: flex;
+
+
+
+/* Animación del fondo */
+
+body::before {
+
+  content: "";
+
+  position: absolute;
+
+  width: 400px;
+
+  height: 400px;
+
+  background: #ffffff30;
+
+  border-radius: 50%;
+
+  top: -100px;
+
+  left: -100px;
+
+
+  animation: mover 8s infinite alternate;
+
 }
-.cell {
-  width: 100px;
-  height: 100px;
-  border: solid 1px black;
-  font-size: 38px;
+
+
+body::after {
+
+  content: "";
+
+  position: absolute;
+
+  width: 300px;
+
+  height: 300px;
+
+  background: #00f5ff40;
+
+  border-radius: 50%;
+
+  bottom: -80px;
+
+  right: -80px;
+
+
+  animation: mover 10s infinite alternate;
+
+}
+
+
+
+@keyframes mover {
+
+  from {
+
+    transform: translateY(0);
+
+  }
+
+  to {
+
+    transform: translateY(50px);
+
+  }
+
+}
+
+
+
+/* ===========================
+   CONTENEDOR
+=========================== */
+
+
+#app {
+
+
+  position: relative;
+
+  z-index: 2;
+
+
+  width: 420px;
+
+
+  padding: 35px;
+
+
+  text-align: center;
+
+
+  background:
+
+    rgba(255, 255, 255, 0.15);
+
+
+  backdrop-filter: blur(15px);
+
+
+  border-radius: 25px;
+
+
+  box-shadow:
+
+    0 20px 40px #0005;
+
+
+}
+
+
+
+/* Título */
+
+
+h1 {
+
+  color: white;
+
+  font-size: 40px;
+
+  margin-bottom: 20px;
+
+  text-shadow:
+    0 5px 15px #0008;
+
+}
+
+
+
+/* ===========================
+   TURNO
+=========================== */
+
+
+#player {
+
+
+  color: white;
+
+
+  font-size: 22px;
+
+
   font-weight: bold;
+
+
+  margin-bottom: 20px;
+
+
+  animation: entrada .5s;
+
+
+}
+
+
+
+/* Mensaje ganador */
+
+
+#message {
+
+
+  color: #fff;
+
+
+  font-size: 24px;
+
+
+  font-weight: bold;
+
+
+  min-height: 35px;
+
+
+  margin-bottom: 20px;
+
+
+}
+
+
+
+/* ===========================
+   TABLERO
+=========================== */
+
+
+.board {
+
+
+  display: flex;
+
+  justify-content: center;
+
+}
+
+
+
+.row {
+
+
+  display: flex;
+
+}
+
+
+
+.cell {
+
+
+  width: 100px;
+
+  height: 100px;
+
+
+  margin: 5px;
+
+
+  border: none;
+
+
+  border-radius: 20px;
+
+
+  background:
+
+    rgba(255, 255, 255, .8);
+
+
+  font-size: 55px;
+
+
+  font-weight: 900;
+
+
+  cursor: pointer;
+
+
+  transition: .3s;
+
+
+  box-shadow:
+
+    0 8px 15px #0004;
+
+
+}
+
+
+
+/* efecto hover */
+
+
+.cell:hover {
+
+
+  transform: scale(1.08);
+
+
+  background: white;
+
+
+}
+
+
+
+/* X */
+
+
+.cell:has(+*) {}
+
+
+
+/* animación ficha */
+
+
+.anim {
+
+
+  animation:
+
+    aparecer .5s ease;
+
+
+}
+
+
+
+@keyframes aparecer {
+
+
+  0% {
+
+    transform: scale(0) rotate(180deg);
+
+    opacity: 0;
+
+  }
+
+
+  100% {
+
+    transform: scale(1) rotate(0);
+
+    opacity: 1;
+
+  }
+
+}
+
+
+
+/* ===========================
+   BOTÓN
+=========================== */
+
+
+#restart {
+
+
+  margin-top: 30px;
+
+
+  padding: 15px 35px;
+
+
+  border: none;
+
+
+  border-radius: 30px;
+
+
+  font-size: 18px;
+
+
+  font-weight: bold;
+
+
+  color: white;
+
+
+  cursor: pointer;
+
+
+  background:
+
+    linear-gradient(45deg,
+      #ff512f,
+      #dd2476);
+
+
+  transition: .3s;
+
+
+}
+
+
+
+#restart:hover {
+
+
+  transform: scale(1.1);
+
+
+  box-shadow:
+
+    0 10px 25px #0006;
+
+
+}
+
+
+
+/* entrada textos */
+
+
+@keyframes entrada {
+
+
+  from {
+
+    opacity: 0;
+
+    transform: translateY(-20px);
+
+  }
+
+
+  to {
+
+    opacity: 1;
+
+    transform: translateY(0);
+
+  }
+
 }
