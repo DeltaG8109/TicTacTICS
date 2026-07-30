@@ -1,10 +1,3 @@
-function Node(value) {
-  this.value = Array.from(value);
-  this.children = [];
-  this.level = 0;
-  this.parent = null;
-  this.solution = false;
-}
 
 let decisionThree = null;
 let pcSolutions = [];
@@ -16,31 +9,60 @@ let board = [
 ];
 
 let turn = 0; //0 user, 1 = pc
-
-function renderBoard() {
-  const html = board.map((row) => {
-    const cells = row.map((cell) => {
-      return `<button class="cell">${cell}</button>`;
-    });
-    return `<div class="row">${cells.join("")}</div>`;
-  });
-
-  document.querySelector("#board").innerHTML = html.join("");
-}
+let gameOver = false;
 
 startGame();
 
 function startGame() {
+
   renderBoard();
-  turn = Math.random() <= 0.5 ? 0 : 1;
+
+  turn = Math.random() < 0.5 ? 0 : 1;
+
   renderPlayer();
 
+
   if (turn === 0) {
+
     playerPlays();
+
   } else {
-    PCPlaysV2();
+
+    computerPlay();
+
   }
+
 }
+
+function renderBoard() {
+
+  const boardHTML = board.map((row, rowIndex) => {
+
+    return `
+            <div class="row">
+                ${row.map((cell, columnIndex) =>`
+
+                    <button 
+                    class="cell"
+                    data-row="${rowIndex}"
+                    data-column="${columnIndex}">
+                    ${cell}
+                    </button>
+
+                `).join("")}
+            </div>
+        `;
+
+  });
+
+
+  document.querySelector("#board").innerHTML =
+    boardHTML.join("");
+
+
+}
+
+
 
 function renderPlayer() {
   document.querySelector("#player").textContent = `${
